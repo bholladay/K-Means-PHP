@@ -59,13 +59,15 @@ function calcCenter($clusters, $data)
 */
 function recenter($coords)
 {
+	$x = 0;
+	$y = 0;
 	foreach ($coords as $k)
 	{
 		$x = $x + $k[0];
 		$y = $y + $k[1];
 	}
-	$center[0] = round($x / count($coords),2);
-	$center[1] = round($y / count($coords),2);
+	$center[0] = $x / count($coords);
+	$center[1] = $y / count($coords);
 	return $center;
 }
 
@@ -81,7 +83,7 @@ function dist($v1, $v2)
 {
 	$x = abs($v1[0] - $v2[0]);
 	$y = abs($v1[1] - $v2[1]);
-	return round(sqrt(($x * $x) + ($y * $y)),2);
+	return sqrt(($x * $x) + ($y * $y));
 }
 
 
@@ -198,17 +200,19 @@ function max_value($array){
 * @param $column2 string The name of the second MySQL field to use
 * @return array The data loaded into two dimensional array, col1 is the first value, followed by col2
 */
-function loadData($column1, $column2)
+function loadData($column1, $column2, $table)
 {
+	global $mysqli;
 	if(0 == strcmp($column1, $column2))
-		$query = "SELECT $column1 from " . TABLE  ." LIMIT 100";
+		$query = "SELECT $column1, id from $table WHERE $column1 IS NOT NULL AND group_id IS NULL";
 	else
-	    $query = "SELECT $column1, $column2 from " . TABLE . " LIMIT 100";
+	    $query = "SELECT $column1, $column2, id from $table WHERE $column1 IS NOT NULL AND $column2 IS NOT NULL AND group_id IS NULL";
 
-    $result = mysql_query($query);
-    while($row = mysql_fetch_assoc($result))
+    $result = $mysqli->query($query);
+	$i = 0;
+    while($row = $result->fetch_assoc())
     {
-            $data[$i] = array($row[$column1], $row[$column2]);
+            $data[$row['id']] = array($row[$column1], $row[$column2]);
                 $i++;
     }
 	
